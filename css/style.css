@@ -1,0 +1,25 @@
+* {
+     margin: 0;
+     padding: 0
+  }
+body{
+    overflow: hidden;
+}   
+.blueBall {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-size: 100%;
+    background-image: url("../img/blueBall.png");
+}
+.redBall {
+    background-size: 100%;
+    background-image: url("../img/redBall.png");
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -50px;
+    margin-top: -50px
+}

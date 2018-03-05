@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ball</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        window.onload = function() {
+            //定义一些基础的类，方便后续的一些方法来调用
+            var class_Base = {
+                //通过id获取节点的方法
+                _get: function(id) {
+                    return document.getElementById(id);
+                },
+                //创建节点的方法
+                _create: function(ele) {
+                    return document.createElement(ele);
+                },
+                //通过class获取节点的方法
+                _getClass:function(className){
+                    return document.getElementsByClassName(className);
+                },
+                //获取鼠标坐标的方法
+                _getXY: function(eve) {
+                    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                    var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+                    return {
+                        x: eve.pageX||scrollLeft + eve.clientX,
+                        y: eve.pageY||scrollTop + eve.clientY
+                    };
+                },
+                //生成随机数的方法
+                random:function(min,max){
+                    return ~~(Math.random()*max+min);
+                }
+
+            }
+            var ball = {
+                _redBallNum: 1,//定义红球的数量
+                _BlueBallNum: 15,//定义蓝球的数量
+                _ballR: 100,//定义球的半径
+                _WWidth: window.innerWidth,//浏览器屏幕的宽度
+                _WHeight: window.innerHeight,//浏览器屏幕的高度
+                //初始化
+                _init: function() {
+                    this._createRedBall();//创建红球
+                    this._createBlueBall(); //创建蓝球
+                },
+                //创建红球的具体方法
+                _createRedBall: function() {
+                    var redBall = class_Base._create("div");//创建红球节点
+                    //给红球添加属性
+                    redBall.className = "redBall";
+                    redBall.id = "red";
+                    //把红球添加到界面上
+                    document.body.appendChild(redBall);
+                },
+                //创建蓝球的具体方法
+                _createBlueBall: function() {
+                    for (var i = 0; i < this._BlueBallNum; i++) {
+                        var randomX =class_Base.random(this._ballR*2,this._WWidth);
+                        var blueBall = class_Base._create("div");//创建蓝球节点
+                        blueBall.className = "blueBall";
+                        //随机生成蓝球的坐标
+                        blueBall.style.top=class_Base.random(600,800)+"px"; 
+                        blueBall.style.left=randomX+"px";
+                        //随机生成蓝球的大小
+                        var size = class_Base.random(50,70);
+                        blueBall.style.width = size + "px";
+                        blueBall.style.height = size + "px";
+                        //随机产生蓝球的速度，让每一个蓝球的速度都不同
+                        blueBall.speed = class_Base.random(1,3); 
+                        //把蓝球放到界面上
+                        document.body.appendChild(blueBall);
+                    }
+                },
+                //蓝球的运动方法
+                _blueBallRun: function() {
+                    var blueBall = class_Base._getClass("blueBall");//获取蓝球
+                    for (var i = 0; i < blueBall.length; i++) {
+                        //通过改变top的值来改变蓝球的坐标，进而出现蓝球运动的效果
+                        blueBall[i].style.top = blueBall[i].offsetTop - blueBall[i].speed +"px";
+                        //如果蓝球运动越过界面，让他再回到初始位置，重新运动
+                        if (blueBall[i].offsetTop < -100) {
+                            blueBall[i].style.top = class_Base.random(600,800) +"px";
+                        }
+                        //调用蓝球与红球碰撞的方法
+                        ball._hit(blueBall[i]);
+                    }
+                },
+                //具体的红球与蓝球碰撞的方法
+                _hit: function(obj) {
+                    var redBall =class_Base._get("red");//获取红球
+                    var redY = redBall.offsetTop ; //红球的纵坐标
+                    var redX = redBall.offsetLeft; //红球的横坐标
+                    var blueY = obj.offsetTop; //蓝球的纵坐标
+                    var blueX = obj.offsetLeft ;//蓝球的横坐标
+                    var distanceX= redX- blueX;//红蓝球的横坐标差值
+                    var distanceY= redY- blueY;//红蓝球的纵坐标差值
+                    var absX = Math.abs(distanceX); //取横坐标差值的绝对值 
+                    var absY = Math.abs(distanceY);  //取纵坐标差值的绝对值
+                    // 通过红球与蓝球的相对位置，来设定蓝球的运动轨迹
+                    if(distanceX < 0){  
+                        if(absX < redBall.offsetHeight){  
+                            if(distanceY < 0 ){  
+                                if(absY < redBall.offsetHeight){
+                                    //红球在蓝球的左上方，蓝球向右下方移动  
+                                    obj.style.left=obj.offsetLeft+obj.speed*2+"px"; 
+                                    obj.style.top =obj.offsetTop+obj.speed*2+"px"; 
+                                }  
+                                return;  
+                            }else{ 
+                                if(absY <obj.offsetHeight){  
+                                    //红球在蓝球的左下方，蓝球向右上方移动  
+                                    obj.style.left=obj.offsetLeft+obj.speed*2+"px"; 
+                                    obj.style.top=(obj.offsetTop- obj.speed*2)+"px";
+                                }  
+                                return;  
+                            }     
+                        }  
+                        return;  
+                    }else{  
+                        if(absX < obj.offsetWidth){  
+                            if(distanceY < 0 ){  
+                                if(absY < redBall.offsetHeight){  
+                                    //红球在蓝球的右上方，蓝球向左下方移动  
+                                    obj.style.left=(obj.offsetLeft-obj.speed*2)+"px"; 
+                                    obj.style.top =obj.offsetTop+ obj.speed*2+"px"; 
+                                }  
+                                return;  
+                            }else{  
+                                if(absY < obj.offsetHeight){  
+                                    //红球在蓝球的右下方，蓝球向左上方移动  
+                                    obj.style.left=(obj.offsetLeft-obj.speed*2)+"px"; 
+                                    obj.style.top=(obj.offsetTop-obj.speed*2)+"px"; 
+                                }  
+                                return;  
+                            }  
+                        }  
+                    return;  
+                    } 
+                }
+            }
+            //调用初始化方法
+            ball._init();
+            //定时器，循环蓝球运动的方法
+            setInterval(ball._blueBallRun, 10);
+            //红球随鼠标进行移动的方法
+            document.onmousemove = function(ev) {
+                var red = class_Base._get("red");
+                var oEvent = ev || event;//为了兼容不同浏览器
+                //获取鼠标的坐标并把鼠标的坐标给红球，做到红球随鼠标移动
+                var pos = class_Base._getXY(oEvent);
+                red.style.left = pos.x + "px";
+                red.style.top = pos.y + "px";
+            }
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>
